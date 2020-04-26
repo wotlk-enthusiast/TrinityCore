@@ -45,6 +45,37 @@ enum Spells
     SPELL_INSANITY_PHASING_5                      = 57512
 };
 
+enum TwistedVisageSpells // These are the possible spells used by the twisted visage, based on their player target's skills
+{
+    TV_SPELL_AVENGERS_SHIELD  = 57799,
+    TV_SPELL_BLOOD_PLAGUE     = 57601,
+    TV_SPELL_BLOOD_THIRST     = 57790,
+    TV_SPELL_CORRUPTION       = 57645,
+    TV_SPELL_DEVASTATE        = 57795,
+    TV_SPELL_DISENGAGE        = 57635,
+    TV_SPELL_EARTH_SHIELD     = 57802,
+    TV_SPELL_EARTH_SHOCK      = 57783,
+    TV_SPELL_FIREBALL         = 57628,
+    TV_SPELL_HEALING_WAVE     = 57785,
+    TV_SPELL_INTERCEPT        = 61490, // This one stuns until cancelled
+    TV_SPELL_INTERCEPT2       = 61491, // This one stuns for 3 seconds
+    TV_SPELL_LIFEBLOOM        = 57762,
+    TV_SPELL_LIGHTNING_BOLT   = 57781,
+    TV_SPELL_MANGLE           = 57657,
+    TV_SPELL_MOONFIRE         = 57647,
+    TV_SPELL_MORTAL_STRIKE    = 57789,
+    TV_SPELL_NOURISH          = 57765,
+    TV_SPELL_PLAGUE_STRIKE    = 57599,
+    TV_SPELL_RENEW            = 57777,
+    TV_SPELL_SEAL_OF_COMMAND  = 57769,
+    TV_SPELL_SHADOW_BOLT      = 57644,
+    TV_SPELL_SINISTER_STRIKE  = 57640,
+    TV_SPELL_SUNDER_ARMOR     = 57807,
+    TV_SPELL_THUNDER_CLAP     = 57832,
+    TV_SPELL_THUNDERSTORM     = 57784,
+    TV_SPELL_WRATH            = 57648
+};
+
 enum Yells
 {
     SAY_AGGRO   = 0,
