@@ -19,6 +19,7 @@
  * Comment: Missing AI for Twisted Visages
  */
 
+#include "Log.h"
 #include "ScriptMgr.h"
 #include "ahnkahet.h"
 #include "InstanceScript.h"
@@ -43,37 +44,56 @@ enum Spells
     SPELL_INSANITY_PHASING_3                      = 57510,
     SPELL_INSANITY_PHASING_4                      = 57511,
     SPELL_INSANITY_PHASING_5                      = 57512
+
+};
+
+uint32 const InsanityPhasingSpells [5] =
+{
+    57508,
+    57509,
+    57510,
+    57511,
+    57512
+};
+
+uint32 const InsanitySummonTwistedVisageSpells [5] =
+{
+    57500,
+    57501,
+    57502,
+    57503,
+    57504,
 };
 
 enum TwistedVisageSpells // These are the possible spells used by the twisted visage, based on their player target's skills
 {
-    TV_SPELL_AVENGERS_SHIELD  = 57799,
-    TV_SPELL_BLOOD_PLAGUE     = 57601,
-    TV_SPELL_BLOOD_THIRST     = 57790,
-    TV_SPELL_CORRUPTION       = 57645,
-    TV_SPELL_DEVASTATE        = 57795,
-    TV_SPELL_DISENGAGE        = 57635,
-    TV_SPELL_EARTH_SHIELD     = 57802,
-    TV_SPELL_EARTH_SHOCK      = 57783,
-    TV_SPELL_FIREBALL         = 57628,
-    TV_SPELL_HEALING_WAVE     = 57785,
-    TV_SPELL_INTERCEPT        = 61490, // This one stuns until cancelled
-    TV_SPELL_INTERCEPT2       = 61491, // This one stuns for 3 seconds
-    TV_SPELL_LIFEBLOOM        = 57762,
-    TV_SPELL_LIGHTNING_BOLT   = 57781,
-    TV_SPELL_MANGLE           = 57657,
-    TV_SPELL_MOONFIRE         = 57647,
-    TV_SPELL_MORTAL_STRIKE    = 57789,
-    TV_SPELL_NOURISH          = 57765,
-    TV_SPELL_PLAGUE_STRIKE    = 57599,
-    TV_SPELL_RENEW            = 57777,
-    TV_SPELL_SEAL_OF_COMMAND  = 57769,
-    TV_SPELL_SHADOW_BOLT      = 57644,
-    TV_SPELL_SINISTER_STRIKE  = 57640,
-    TV_SPELL_SUNDER_ARMOR     = 57807,
-    TV_SPELL_THUNDER_CLAP     = 57832,
-    TV_SPELL_THUNDERSTORM     = 57784,
-    TV_SPELL_WRATH            = 57648
+    TV_SPELL_AVENGERS_SHIELD  = 57799, // Protection Paladin, original 31935
+    TV_SPELL_BLOOD_PLAGUE     = 57601, // Death knight, maybe? Has no similarly named spell
+    TV_SPELL_BLOOD_THIRST     = 57790, // Fury Warrior, original 23881
+    TV_SPELL_CORRUPTION       = 57645, // Warlock
+    TV_SPELL_DEVASTATE        = 57795, // Protection Warrior, original 20243
+    TV_SPELL_DISENGAGE        = 57635, // Hunter
+    TV_SPELL_EARTH_SHIELD     = 57802, // Resto Shaman, Original 974
+    TV_SPELL_EARTH_SHOCK      = 57783, // Elemental Shaman
+    TV_SPELL_FIREBALL         = 57628, // All Mage
+    TV_SPELL_HEALING_WAVE     = 57785, // Resto Shaman
+    TV_SPELL_INTERCEPT_DNU    = 61490, // This one stuns until cancelled - Do not use?
+    TV_SPELL_INTERCEPT        = 61491, // All Warrior
+    TV_SPELL_LIFEBLOOM        = 57762, // Resto Druid
+    TV_SPELL_LIGHTNING_BOLT   = 57781, // Elemental Shaman
+    TV_SPELL_MANGLE           = 57657, // Feral Druid, Original 33917
+    TV_SPELL_MOONFIRE         = 57647, // Balance Druid
+    TV_SPELL_MORTAL_STRIKE    = 57789, // Arms Warrior, Original 12294
+    TV_SPELL_NOURISH          = 57765, // Resto Druid
+    TV_SPELL_PLAGUE_STRIKE    = 57599, // Death Knight
+    TV_SPELL_RENEW            = 57777, // Priest
+    TV_SPELL_SEAL_OF_COMMAND  = 57769, // Retribution Paladin
+    TV_SPELL_SHADOW_BOLT      = 57644, // Warlock
+    TV_SPELL_SINISTER_STRIKE  = 57640, // Rogue
+    TV_SPELL_SUNDER_ARMOR     = 57807, // All Warrior except Protection
+    TV_SPELL_THUNDER_CLAP     = 57832, // All Warrior
+    TV_SPELL_THUNDERSTORM     = 57784, // Elemental Shaman, 51490
+    TV_SPELL_WRATH            = 57648  // Balance Druid
 };
 
 enum Yells
@@ -165,13 +185,28 @@ public:
                     Player* player = i->GetSource();
                     if (!player || !player->IsAlive())
                         continue;
+                    // This runs for each player
+                    // Decide what kind of spells they will use
+                    // Check class
+                    // player->GetClass();
+                    // Check for Specialization in class
+                    // player->HasTalent(spell_id,spec);
                     // Summon clone
+                    // player->CastSpell(player,InsanityPhasingSpells[insanityHandled]);  // Player casts this spell to phase themselves
+                    // player->CastSpell(player,InsanitySummonTwistedVisageSpells[insanityHandled]); // This spell should be cast once for each phase other players are in
+                    // Get the resultant spawn of the cast spell
+                    // Cast the spell to clone the player's appearance
+                    // player->CastSpell(summon, SPELL_CLONE_PLAYER, true)
+                    // Set the phase
+                    // summon->CastSpell(player, InsanityPhasingSpells[???]);
+                    // Start the AI for the player's spec
                     if (Unit* summon = me->SummonCreature(NPC_TWISTED_VISAGE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 0))
                     {
                         // clone
                         player->CastSpell(summon, SPELL_CLONE_PLAYER, true);
                         // set phase
                         summon->SetPhaseMask((1<<(4+insanityHandled)), true);
+                        summon->
                     }
                 }
                 ++insanityHandled;
