@@ -212,6 +212,7 @@ public:
                     player->CastSpell(player,InsanitySummonTwistedVisageSpells[insanityHandled],true);
 
                     // Next, get the creature we just summoned
+                    // FIXME: This is not the way to do it.  When we come through again for another player, then we will always get the same creature, causing phantom visages
                     Creature* summoned = GetClosestCreatureWithEntry(player,TwistedVisageNPCs[insanityHandled],1.0f,true);
 
                     // Add to the summons list
@@ -280,6 +281,7 @@ public:
 
         void JustSummoned(Creature* summon) override
         {
+            // This is not called now that we aren't doing manual summons.
             // Summons.Summon(summon);
         }
 
@@ -309,12 +311,14 @@ public:
 
         virtual void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
         {
+            // This is not called since we aren't doing manual summons
             TC_LOG_INFO("scripts","Summoned Creature %s has died",summon->GetName());
         }
 
 
         void SummonedCreatureDespawn(Creature* summon) override
         {
+            // This is also not called since we aren't doing manual summons
             TC_LOG_INFO("scripts","Summoned Creature %s has despawned",summon->GetName());
             uint32 phase = summon->GetPhaseMask();
             uint32 nextPhase = 0;
