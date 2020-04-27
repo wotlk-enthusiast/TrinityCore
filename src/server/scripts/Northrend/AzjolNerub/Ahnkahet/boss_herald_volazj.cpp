@@ -38,7 +38,7 @@ enum Spells
     SPELL_MIND_FLAY                               = 57941,
     SPELL_SHADOW_BOLT_VOLLEY                      = 57942,
     SPELL_SHIVER                                  = 57949,
-    SPELL_CLONE_PLAYER                            = 57507, //cast on player during insanity
+    SPELL_CLONE_PLAYER                            = 57507, // Player should cast on a Twisted Visage for it to clone the player's appearance
     SPELL_INSANITY_PHASING_1                      = 57508,
     SPELL_INSANITY_PHASING_2                      = 57509,
     SPELL_INSANITY_PHASING_3                      = 57510,
@@ -47,22 +47,22 @@ enum Spells
 
 };
 
-uint32 const InsanityPhasingSpells [5] =
+uint32 const InsanityPhasingSpells [5] = // These are the spells that the player casts in order to phase them. Also produces the debuff "Insanity"
 {
-    57508,
-    57509,
-    57510,
-    57511,
-    57512
+    57508, // Phase 16
+    57509, // Phase 32
+    57510, // Phase 64
+    57511, // Phase 128
+    57512  // Phase 256
 };
 
-uint32 const InsanitySummonTwistedVisageSpells [5] =
+uint32 const InsanitySummonTwistedVisageSpells [5] = // These are the spells that the player should cast to make a Twisted Visage of themselves for other players to attack
 {
-    57500,
-    57501,
-    57502,
-    57503,
-    57504,
+    57500, // Summons 30621
+    57501, // Summons 30622
+    57502, // Summons 30623
+    57503, // Summons 30624
+    57504  // Summons 30625
 };
 
 enum TwistedVisageSpells // These are the possible spells used by the twisted visage, based on their player target's skills
