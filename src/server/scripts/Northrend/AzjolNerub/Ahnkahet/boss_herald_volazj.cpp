@@ -32,7 +32,7 @@
 
 enum Spells
 {
-    SPELL_INSANITY                                = 57496, //Dummy
+    SPELL_INSANITY                                = 57496, // Dummy cast, but it hits every player
     INSANITY_VISUAL                               = 57561,
     SPELL_INSANITY_TARGET                         = 57508,
     SPELL_MIND_FLAY                               = 57941,
@@ -65,11 +65,21 @@ uint32 const InsanitySummonTwistedVisageSpells [5] = // These are the spells tha
     57504  // Summons 30625
 };
 
+uint32 const TwistedVisageNPCs [5] = // These are the NPC IDs that are spawned by the SummonTwistedVisageSpells above
+{
+    30621, // Summoned by 57500
+    30622, // Summoned by 57501
+    30623, // Summoned by 57502
+    30624, // Summoned by 57503
+    30625  // Summoned by 57504
+};
+
 enum TwistedVisageSpells // These are the possible spells used by the twisted visage, based on their player target's skills
 {
     TV_SPELL_AVENGERS_SHIELD  = 57799, // Protection Paladin, original 31935
-    TV_SPELL_BLOOD_PLAGUE     = 57601, // Death knight, maybe? Has no similarly named spell
+    TV_SPELL_BLOOD_PLAGUE     = 57601, // Probably the result of a death knight's Plague Strike
     TV_SPELL_BLOOD_THIRST     = 57790, // Fury Warrior, original 23881
+    TV_SPELL_CONSECRATION     = 57798, // All Paladin
     TV_SPELL_CORRUPTION       = 57645, // Warlock
     TV_SPELL_DEVASTATE        = 57795, // Protection Warrior, original 20243
     TV_SPELL_DISENGAGE        = 57635, // Hunter
@@ -164,51 +174,70 @@ public:
         {
             if (spell->Id == SPELL_INSANITY)
             {
-                // Not good target or too many players
+                // Check Target
                 if (target->GetTypeId() != TYPEID_PLAYER || insanityHandled > 4)
+                    // Target either isn't player, or there are more than 5 players in the instance
                     return;
-                // First target - start channel visual and set self as unnattackable
+
+                // Check if this is the first Insanity to hit a player
                 if (!insanityHandled)
                 {
-                    // Channel visual
+                    // First target to be hit with insanity
+                    // Channel the visual effect
                     DoCast(me, INSANITY_VISUAL, true);
-                    // Unattackable
+                    // Make myself unattackable
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->SetControlled(true, UNIT_STATE_STUNNED);
+                    TC_LOG_INFO("scripts","First Insanity Handled");
                 }
-                // phase mask
-                target->CastSpell(target, SPELL_INSANITY_TARGET+insanityHandled, true);
-                // summon twisted party members for this target
+
+                // Apply phase mask to the player
+                target->CastSpell(target, InsanityPhasingSpells[insanityHandled], true);
+                TC_LOG_INFO("scripts","Applying phase mask %d to %s",insanityHandled,target->GetName());
+
+                // Summon Twisted Visages for the current player
+                // Get players currently in the instance
                 Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                TC_LOG_INFO("scripts","Getting Player List (%d players)",players.getSize());
                 for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
                 {
+                    // For each player in the instance
                     Player* player = i->GetSource();
-                    if (!player || !player->IsAlive())
+                    // Check for valid player
+                    if (!player || !player->IsAlive() || player == target)
+                        // Player either was null, is not alive, or is the current player affected. Skip
                         continue;
-                    // This runs for each player
+                    TC_LOG_INFO("scripts","Found valid other player %s",player->GetName());
+                    // Summon a twisted visage
+                    player->CastSpell(player,InsanitySummonTwistedVisageSpells[insanityHandled],true);
+
+                    // Next, get the creature we just summoned
+                    Creature* summoned = GetClosestCreatureWithEntry(player,TwistedVisageNPCs[insanityHandled],1.0f,true);
+
+                    // Add to the summons list
+                    Summons.Summon(summoned);
+
+                    // Next, clone their appearance
+                    player->CastSpell(summoned,SPELL_CLONE_PLAYER,true);
+
+                    // Set the summoned creature's phase mask
+                    summoned->SetPhaseMask((1<<(4+insanityHandled)), true);
+
+                    // Start their attack
+                    summoned->SetReactState(REACT_AGGRESSIVE);
+                    DoZoneInCombat(summoned);
+
                     // Decide what kind of spells they will use
                     // Check class
                     // player->GetClass();
                     // Check for Specialization in class
                     // player->HasTalent(spell_id,spec);
-                    // Summon clone
-                    // player->CastSpell(player,InsanityPhasingSpells[insanityHandled]);  // Player casts this spell to phase themselves
-                    // player->CastSpell(player,InsanitySummonTwistedVisageSpells[insanityHandled]); // This spell should be cast once for each phase other players are in
-                    // Get the resultant spawn of the cast spell
-                    // Cast the spell to clone the player's appearance
-                    // player->CastSpell(summon, SPELL_CLONE_PLAYER, true)
-                    // Set the phase
-                    // summon->CastSpell(player, InsanityPhasingSpells[???]);
-                    // Start the AI for the player's spec
-                    if (Unit* summon = me->SummonCreature(NPC_TWISTED_VISAGE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 0))
-                    {
-                        // clone
-                        player->CastSpell(summon, SPELL_CLONE_PLAYER, true);
-                        // set phase
-                        summon->SetPhaseMask((1<<(4+insanityHandled)), true);
-                        summon->
-                    }
+                    // Start the AI based on the player's spec
                 }
+                // Put the zone in combat to start all the attackers
+
+                // All done, so increment the insanity handled
+                TC_LOG_INFO("scripts","All done with this insanity.");
                 ++insanityHandled;
             }
         }
@@ -251,7 +280,7 @@ public:
 
         void JustSummoned(Creature* summon) override
         {
-            Summons.Summon(summon);
+            // Summons.Summon(summon);
         }
 
         uint32 GetSpellForPhaseMask(uint32 phase)
@@ -278,8 +307,15 @@ public:
             return spell;
         }
 
+        virtual void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+        {
+            TC_LOG_INFO("scripts","Summoned Creature %s has died",summon->GetName());
+        }
+
+
         void SummonedCreatureDespawn(Creature* summon) override
         {
+            TC_LOG_INFO("scripts","Summoned Creature %s has despawned",summon->GetName());
             uint32 phase = summon->GetPhaseMask();
             uint32 nextPhase = 0;
             Summons.Despawn(summon);
